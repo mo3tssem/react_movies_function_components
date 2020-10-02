@@ -1,23 +1,44 @@
 import React, { Component } from "react"
-import Joi from "joi-browser"
+import Joi, { schema } from "joi-browser"
 import Input from "./input"
 import Select from "./select"
 
-class Form extends Component {
-  state = {
-    data: {},
-    errors: {},
+export const Form = () => {
+  const state = {
+    data: "",
+    error: {},
   }
 
-  validateProperty = (input) => {
+  const doSubmit = {}
+  const setData = {}
+  const setErrors = {}
+  const schema = {}
+  const setGenres = {}
+
+  const init = (
+    state,
+    schema,
+    setData,
+    setErrors,
+    doSubmit,
+    setGenres = ""
+  ) => {
+    this.state = state
+    this.schema = schema
+    this.setData = setData
+    this.setErrors = setErrors
+    this.doSubmit = doSubmit
+    this.setGenres = setGenres
+  }
+
+  const validateProperty = (input) => {
     const { name, value } = input
     const obj = { [name]: value }
     const schema = { [name]: this.schema[name] }
     const { error } = Joi.validate(obj, schema)
     return error ? error.details[0].message : null
   }
-
-  validate = () => {
+  const validate = () => {
     const options = {
       abortEarly: false,
     }
@@ -29,37 +50,42 @@ class Form extends Component {
     return errors
   }
 
-  handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
 
-    const errors = this.validate()
-    this.setState({ errors: errors || {} }) // never be null
+    const errors = validate()
+
+    this.state.error = errors || {}
+    this.setErrors(this.state.error)
     if (errors) return
 
     this.doSubmit()
   }
 
-  handleChange = ({ currentTarget: input }) => {
+  const handleChange = ({ currentTarget: input }) => {
     const errors = { ...this.state.errors }
-    const erroMessage = this.validateProperty(input)
+    const erroMessage = validateProperty(input)
 
     if (erroMessage) errors[input.name] = erroMessage
     else delete errors[input.name]
 
     const data = { ...this.state.data }
     data[input.name] = input.value
-    this.setState({ data, errors })
+    this.state.errors = errors
+    this.state.data = data
+    this.setData(this.state.data)
+    this.setErrors(this.state.errors)
   }
 
-  renderButton(label) {
+  const renderButton = (label) => {
     return (
-      <button disabled={this.validate()} className="btn btn-primary">
+      <button disabled={validate()} className="btn btn-primary">
         {label}
       </button>
     )
   }
 
-  renderInput(name, label, type = "text") {
+  const renderInput = (name, label, type = "text") => {
     const { data, errors } = this.state
 
     return (
@@ -68,13 +94,13 @@ class Form extends Component {
         name={name}
         value={data[name]}
         label={label}
-        onChange={this.handleChange}
+        onChange={handleChange}
         error={errors[name]}
       />
     )
   }
 
-  renderSelect(name, label, options) {
+  const renderSelect = (name, label, options) => {
     const { data, errors } = this.state
 
     return (
@@ -83,10 +109,20 @@ class Form extends Component {
         value={data[name]}
         label={label}
         options={options}
-        onChange={this.handleChange}
+        onChange={handleChange}
         error={errors[name]}
       />
     )
   }
+
+  return {
+    init: init,
+    renderSelect: renderSelect,
+    renderInput: renderInput,
+    renderButton: renderButton,
+    handleChange: handleChange,
+    handleSubmit: handleSubmit,
+    validate: validate,
+    validateProperty: validateProperty,
+  }
 }
-export default Form
