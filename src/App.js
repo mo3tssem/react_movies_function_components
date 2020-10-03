@@ -16,6 +16,8 @@ import ProdectedRoute from "./components/common/prodectedRoute"
 
 import "react-toastify/dist/ReactToastify.css"
 import "./App.css"
+
+/*  Motassem Awaja */
 function App() {
   const [user, setUser] = useState({})
 
